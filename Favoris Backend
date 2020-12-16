@@ -1,0 +1,52 @@
+app.post("/api/partner/getOffers",(req, res) => {
+  const decoded = jwt.decode(req.body.userToken);
+
+  let query = {
+    _id:  decoded.id /*ID of the partner*/,
+  };
+
+  console.log(query._id)
+  
+  let options = {
+    useFindAndModify: false,
+    //lean: true
+  }; // useFindAndModify set to false at query level
+  // options = {useFindAndModify: false,new:true} if you want updated docs in return
+
+  let fields = [
+    "images",
+    "categories",
+    "partner",
+    "shops",
+    "description",
+    "name",
+    "user_terms",
+    "start_date",
+    "end_date",
+    "end_date",
+    "is_promoted",
+    "limit",
+    "max_use_per_user",
+    "rating",
+    "initial_price",
+    "created_by",
+    "created_at",
+    "updated_at",
+  ];
+
+
+  Offer.find(
+    { partner: { $in: query._id } },
+    fields,
+    { lean: true },
+    (err, shopData) => {
+      if (err) {
+        return next(err);
+      } else {
+        res.json(shopData);
+      }
+    }
+  );
+
+});
+/////
