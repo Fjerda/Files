@@ -1,0 +1,216 @@
+import React, { Component, Fragment } from "react";
+import axios from "axios";
+
+import {
+  Row,
+  Card,
+  CardBody,
+  Badge,
+  Pagination,
+  PaginationItem,
+  PaginationLink,
+} from "reactstrap";
+
+import Breadcrumb from "../../containers/navs/Breadcrumb";
+import {
+  Separator,
+  Colxx,
+} from "../../components/common/CustomBootstrap";
+import { injectIntl } from "react-intl";
+import LinesEllipsis from "react-lines-ellipsis";
+import responsiveHOC from "react-lines-ellipsis/lib/responsiveHOC";
+import { NavLink, Redirect } from "react-router-dom";
+
+const ResponsiveEllipsis = responsiveHOC()(LinesEllipsis);
+
+class Profile extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      items: "",
+      error:""
+    };
+  }
+
+  dataListRender() {
+    let dataToSubmit = {
+      userToken: localStorage.getItem("token"),
+    };
+    /////////////////////////////// DATA SUBMISSION
+   
+    axios
+    .post(`http://localhost:5000/api/partner/getOffers`, dataToSubmit)
+    .then((response) => {
+      this.setState({ items: response.data });
+     
+    });
+  }
+
+  componentDidMount() {
+    this.dataListRender();
+  }
+
+  render() {
+    {
+
+      if(this.state.error && this.state.items.length <1){
+        return (
+          <Redirect to='/user/login'/> 
+        ) 
+        
+      }
+
+      if (this.state.items.length < 1) {
+        return (
+          <Fragment>
+            <Row>
+              <Colxx xxs="12">
+                <Breadcrumb heading="Vos favoris" match={this.props.match} />
+                <Separator className="mb-5" />
+              </Colxx>
+              <span> Ajoutez des produits pour les voirs </span>
+              <i
+                className="simple-icon-heart mr-1"
+                width="800"
+                height="900"
+              ></i>
+            </Row>
+          </Fragment>
+        );
+      }
+    }
+
+    return (
+      <Fragment>
+        <Row>
+          <Colxx xxs="12">
+            <Breadcrumb heading="Vos favoris" match={this.props.match} />
+            <Separator className="mb-5" />
+          </Colxx>
+          {this.state.items.map((offers, index) => {
+            return (
+              <Colxx xxs="12" lg="6" className="mb-5" key={index}>
+                <Card className="flex-row listing-card-container">
+                  <div className="w-40 position-relative">
+                    <NavLink
+                      to={{
+                        pathname: "../product/details",
+                        state: {
+                          id: offers._id,
+                          partner: offers.partner,
+                          name: offers.name,
+                          description: offers.description,
+                          categories: offers.categories,
+                          start_date: offers.start_date,
+                          end_date: offers.end_date,
+                          shops: offers.shops,
+                          is_promoted: offers.is_promoted,
+                          images: offers.images,
+                          max_use_per_user: offers.max_use_per_user,
+                          initial_price: offers.initial_price,
+                          limit: offers.limit,
+                          is_promoted: offers.is_promoted,
+                          user_terms: offers.user_terms,
+                          buyable_qte: offers.buyable_qte,
+                        },
+                      }}
+                    >
+                      <img
+                        style={{ width: 200, height: 250 }}
+                        className="card-img-left"
+                        src={offers.images[0]}
+                        alt="Card cap"
+                        width="250"
+                        height="250"
+                      />
+
+                      {offers.categories && (
+                        <Badge
+                          color="primary"
+                          pill
+                          className="position-absolute badge-top-left"
+                        >
+                          {offers.categories}
+                        </Badge>
+                      )}
+                    </NavLink>
+                  </div>
+                  <div className="w-60 d-flex align-items-center">
+                    <CardBody>
+                      <NavLink
+                        to={{
+                          pathname: "../product/details",
+                          state: {
+                            id: offers._id,
+                            partner: offers.partner,
+                            name: offers.name,
+                            description: offers.description,
+                            categories: offers.categories,
+                            start_date: offers.start_date,
+                            end_date: offers.end_date,
+                            shops: offers.shops,
+                            is_promoted: offers.is_promoted,
+                            images: offers.images,
+                            max_use_per_user: offers.max_use_per_user,
+                            initial_price: offers.initial_price,
+                            limit: offers.limit,
+                            is_promoted: offers.is_promoted,
+                            user_terms: offers.user_terms,
+                            buyable_qte: offers.buyable_qte,
+                          },
+                        }}
+                      >
+                        <ResponsiveEllipsis
+                          className="mb-3 listing-heading"
+                          text={offers.title}
+                          maxLine="2"
+                          trimRight={true}
+                          basedOn="words"
+                          component="h5"
+                        />
+                      </NavLink>
+                      <ResponsiveEllipsis
+                        className="listing-desc text-muted"
+                        text={offers.description}
+                        maxLine="3"
+                        trimRight={true}
+                        basedOn="words"
+                        component="p"
+                      />
+                    </CardBody>
+                  </div>
+                </Card>
+              </Colxx>
+            );
+          })}
+        </Row>
+        <Row>
+          <Colxx xxs="12">
+            <Pagination listClassName="justify-content-center">
+              <PaginationItem>
+                <PaginationLink className="prev" href="#">
+                  <i className="simple-icon-arrow-left" />
+                </PaginationLink>
+              </PaginationItem>
+              <PaginationItem active>
+                <PaginationLink href="#">1</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink href="#">2</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink href="#">3</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink className="next" href="#">
+                  <i className="simple-icon-arrow-right" />
+                </PaginationLink>
+              </PaginationItem>
+            </Pagination>
+          </Colxx>
+        </Row>
+      </Fragment>
+    );
+  }
+}
+export default injectIntl(Profile);
